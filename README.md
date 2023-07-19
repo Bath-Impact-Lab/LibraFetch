@@ -4,9 +4,9 @@ It implements [Selenium](https://www.seleniumhq.org/) for browser automation and
 
 ---
 
-## Setting up
+## Setup
 
-1. Install requirements from Terminal:
+1. Install requirements using terminal:
 ```
 pip install -r requirements.txt
 ```
@@ -23,7 +23,7 @@ Open terminal in the directory of **scrape.py** and enter:
 ```
 python scrape.py
 ```
-Go grab a cup of coffee while waiting... oh wait, it's already done!
+Open output folder to see whats been scraped.
 
 ---
 
