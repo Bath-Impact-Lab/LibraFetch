@@ -140,7 +140,7 @@ def boa_imagescrape():
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
         time.sleep(4)  # Wait 4 seconds for all the images to load
         data = driver.execute_script("return document.documentElement.outerHTML")
-        print("Page " + str(i))
+        print("Extracting documents")
         scraper = BeautifulSoup(data, "lxml")
 
         # Find the List of documents to scrape:
@@ -149,9 +149,9 @@ def boa_imagescrape():
         # 	<li class="ui-dv-page-list__item" data-page-no="1"><a class="ui-dv-page-list__link js-page-link" data-page-no="1"><span>img 1: Constitution of the ANC (1919)</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	...
-        img_container = scraper.find_all("ul", {"class": "z_h_9d80b z_h_2f2f0"})
-
-
+        docs_container = scraper.find_all('ul', {'class': 'ui-dv-page-list'})
+        for j in range(0, len(docs_container) - 1):
+            name = img_src.rsplit("/", 1)[-1]
         # click each document in list
 
         # download a document:
@@ -182,15 +182,15 @@ while True:
         if len(scrape_this_url_new) > 4:
             scrape_this_url = scrape_this_url_new
         break
-    while True:
-        print("Please select a directory to save your scraped files.")
+#    while True:
+#        print("Please select a directory to save your scraped files.")
 
         scrape_directory = "D:/shutterscape_output"
         #scrape_directory = askDialog()
-        if scrape_directory == None or scrape_directory == "":
-            print("You must select a directory to save your scraped files.")
-            continue
-        break
+#        if scrape_directory == None or scrape_directory == "":
+#            print("You must select a directory to save your scraped files.")
+#            continue
+#        break
         #    if searchMode == "v":
         #       videoscrape()
         #  if searchMode == "i":
