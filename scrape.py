@@ -13,6 +13,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.select import Select  # Allows button clicks
 
 
 def askDialog():
@@ -26,7 +27,7 @@ def inp(text):
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
-def videoscrape():
+def shutterstock_videoscrape():
     try:
         # chromepath = ChromeDriverManager().install()
         # print("ChromeDriverManager path=" + chromepath)
@@ -87,7 +88,7 @@ def videoscrape():
         print(e)
 
 
-def imagescrape():
+def shutterstock_imagescrape():
     try:
         webdriver_options = Options()
         webdriver_options.add_argument('--headless')
@@ -121,20 +122,90 @@ def imagescrape():
     except Exception as e:
         print(e)
 
+def boa_imagescrape():
+    try:
+        webdriver_options = Options()
+        webdriver_options.add_argument('--headless')
+        webdriver_options.add_argument('--no-sandbox')
+        webdriver_options.add_argument('--disable-dev-shm-usage')
+        # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
+
+        s = Service('chromedriver/chromedriver')
+        driver = webdriver.Chrome(service=s, options=webdriver_options)
+
+        driver.maximize_window()
+
+        url = scrape_this_url
+        driver.get(url)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
+        time.sleep(4)  # Wait 4 seconds for all the images to load
+        data = driver.execute_script("return document.documentElement.outerHTML")
+        print("Page " + str(i))
+        scraper = BeautifulSoup(data, "lxml")
+
+        # Find the List of documents to scrape:
+        #
+        # <ul class="o-list-bare ui-dv-page-list js-page-list" style="height:1022px">
+        # 	<li class="ui-dv-page-list__item" data-page-no="1"><a class="ui-dv-page-list__link js-page-link" data-page-no="1"><span>img 1: Constitution of the ANC (1919)</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
+        # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
+        # 	...
+        img_container = scraper.find_all("ul", {"class": "z_h_9d80b z_h_2f2f0"})
+
+
+        # click each document in list
+
+        # download a document:
+        #   <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
+	    #       <span data-l10n-id="download_label">Download</span>
+        #   </button>
+        for j in range(0, len(documents_to_scrape) - 1):
+            img_src = img_container[j].get("src")
+            name = img_src.rsplit("/", 1)[-1]
+            try:
+                urlretrieve(img_src, os.path.join(scrape_directory, os.path.basename(img_src)))
+                print("Scraped " + name)
+            except Exception as e:
+                print(e)
+
+        driver.close()
+    except Exception as e:
+        print(e)
 
 print("Scrape")
 
 # scrape_directory = "C:/Users/[username]/[path]"
+scrape_this_url = "https://microform.digital/boa/documents/11165/papers-relating-to-the-anc-1919-1994"
 
 while True:
     while True:
+        scrape_this_url_new =  inp("Please type a url to scrape ( hit return to accept default:" + scrape_this_url + " )" + ": ")
+        if len(scrape_this_url_new) > 4:
+            scrape_this_url = scrape_this_url_new
+        break
+    while True:
         print("Please select a directory to save your scraped files.")
-        scrape_directory = askDialog()
+
+        scrape_directory = "D:/shutterscape_output"
+        #scrape_directory = askDialog()
         if scrape_directory == None or scrape_directory == "":
             print("You must select a directory to save your scraped files.")
             continue
         break
-    while True:
+        #    if searchMode == "v":
+        #       videoscrape()
+        #  if searchMode == "i":
+        #     imagescrape()
+    boa_imagescrape()
+    print("Scraping complete.")
+#    restartScrape = inp("Keep scraping? ('y' for yes or 'n' for no) ")
+#    if restartScrape == "n":
+#        print("Scraping ended.")
+#        break
+
+
+
+
+'''    while True:
         searchMode = inp("Search mode ('v' for video or 'i' for image): ")
         if searchMode != "v" and searchMode != "i":
             print("You must select 'v' for video or 'i' for image.")
@@ -173,12 +244,4 @@ while True:
             print("You must have scrape at least one page.")
             continue
         break
-    if searchMode == "v":
-        videoscrape()
-    if searchMode == "i":
-        imagescrape()
-    print("Scraping complete.")
-    restartScrape = inp("Keep scraping? ('y' for yes or 'n' for no) ")
-    if restartScrape == "n":
-        print("Scraping ended.")
-        break
+'''
