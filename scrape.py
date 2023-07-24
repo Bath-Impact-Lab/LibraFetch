@@ -4,6 +4,8 @@ import time
 import tkinter
 import tkinter.constants
 import tkinter.filedialog
+import random
+import re
 from urllib.request import urlretrieve
 
 from bs4 import BeautifulSoup
@@ -126,7 +128,7 @@ def shutterstock_imagescrape():
 def boa_image_scrape(url):
     try:
         webdriver_options = Options()
-        webdriver_options.add_argument('--headless')
+        #webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
         webdriver_options.add_argument('--disable-dev-shm-usage')
         # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
@@ -138,7 +140,7 @@ def boa_image_scrape(url):
 
         driver.get(url)
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
-        time.sleep(4)  # Wait 4 seconds for all the images to load
+        time.sleep(6)  # Wait 4 seconds for all the images to load
         data = driver.execute_script("return document.documentElement.outerHTML")
         print("Extracting documents")
         good_soup = BeautifulSoup(data, "lxml")
@@ -150,14 +152,36 @@ def boa_image_scrape(url):
         # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	...
         docs_container = good_soup.find_all('ul', {'class': 'ui-dv-page-list'})
+        page_link_counter = 1
         for documents_to_click_and_download in docs_container[0].find_all('li', {'class': 'ui-dv-page-list__item'}):
             #@todo continue here
-            document_name = documents_to_click_and_download['text']
+            document_name = documents_to_click_and_download.text
 
-            # click this link and download button
+            # remove the "i" from the end of the document name
+            #pattern = r"^'|'i$"
+            #formatted_document_name = re.sub(pattern, '', document_name)
+
+            # click this link
+            link = driver.find_element(By.CSS_SELECTOR, 'li.ui-dv-page-list__item[data-page-no="' + str(page_link_counter) + '"]')
+            link.click()
+
+            # sleep for random time between 3 and 9 seconds
+            time.sleep(random.randint(3, 9))
+
+            # check document doesn't already exist
+
+
+            #   click download button
+            #< button id = "download" class ="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download" >
+            #    < span data - l10n - id = "download_label" > Download < / span >
+            #</button>
+
+            # @todo carry on here
+            driver.find_element(By.ID, "download").click()
+
             #document_url = documents_to_click_and_download['href']
 
-
+            page_link_counter+= 1
 
         exit()
         # click each document in list
