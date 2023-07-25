@@ -10,6 +10,7 @@ from urllib.request import urlretrieve
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -139,8 +140,8 @@ def boa_image_scrape(url):
         driver.maximize_window()
 
         driver.get(url)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
-        time.sleep(6)  # Wait 4 seconds for all the images to load
+#        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
+        time.sleep(3)  # Wait 4 seconds for all the images to load
         data = driver.execute_script("return document.documentElement.outerHTML")
         print("Extracting documents")
         good_soup = BeautifulSoup(data, "lxml")
@@ -151,6 +152,9 @@ def boa_image_scrape(url):
         # 	<li class="ui-dv-page-list__item" data-page-no="1"><a class="ui-dv-page-list__link js-page-link" data-page-no="1"><span>img 1: Constitution of the ANC (1919)</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	...
+
+
+
         docs_container = good_soup.find_all('ul', {'class': 'ui-dv-page-list'})
         page_link_counter = 1
         for documents_to_click_and_download in docs_container[0].find_all('li', {'class': 'ui-dv-page-list__item'}):
@@ -172,12 +176,28 @@ def boa_image_scrape(url):
 
 
             #   click download button
-            #< button id = "download" class ="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download" >
-            #    < span data - l10n - id = "download_label" > Download < / span >
+            #<button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download" >
+            #    <span data-l10n-id="download_label">Download </span>
             #</button>
 
+
+#<div class="ui-dv-pdf-container js-pdf-container" style="height:1187px">
+#            <iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe><iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe></div>
+
             # @todo carry on here
-            driver.find_element(By.ID, "download").click()
+            pdf_element = driver.find_element(By.CLASS_NAME, "body")
+
+            action = ActionChains(driver)
+
+            xoffset = 2448
+            yoffset = 59
+            action.move_to_element_with_offset(pdf_element, xoffset, yoffset).click().build().pperform()
+
+            #action.click_and_hold().perform()
+            #action
+
+            #download_link = driver.find_element(By.CLASS_NAME, "download")
+            ##download_link.click()
 
             #document_url = documents_to_click_and_download['href']
 
