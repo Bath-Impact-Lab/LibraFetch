@@ -133,12 +133,14 @@ def boa_image_scrape(url):
         #webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
         webdriver_options.add_argument('--disable-dev-shm-usage')
+
         # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
 
         s = Service('chromedriver/chromedriver')
         driver = webdriver.Chrome(service=s, options=webdriver_options)
 
-        driver.maximize_window()
+        #driver.maximize_window()
+        driver.set_window_size(1400, 1000)
 
         driver.get(url)
 #        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
@@ -153,9 +155,17 @@ def boa_image_scrape(url):
         # 	<li class="ui-dv-page-list__item" data-page-no="1"><a class="ui-dv-page-list__link js-page-link" data-page-no="1"><span>img 1: Constitution of the ANC (1919)</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	...
+        pyautogui.FAILSAFE = False
+        pyautogui.moveTo(10, 10, duration=1)
 
-        pyautogui.moveTo(1569, 1289, duration=1)
+        # close GDRP popup
+        pyautogui.moveTo(1569, 1289, duration=2)
         pyautogui.click()
+
+        # @todo switch to lite viewer to allow filename save
+        pyautogui.moveTo(1569, 1289, duration=2)
+        pyautogui.click()
+
 
         docs_container = good_soup.find_all('ul', {'class': 'ui-dv-page-list'})
         page_link_counter = 1
@@ -166,7 +176,7 @@ def boa_image_scrape(url):
             # remove the "i" from the end of the document name
             #pattern = r"^'|'i$"
             #formatted_document_name = re.sub(pattern, '', document_name)
-
+            time.sleep(random.randint(1, 3))
             # click this link
             link = driver.find_element(By.CSS_SELECTOR, 'li.ui-dv-page-list__item[data-page-no="' + str(page_link_counter) + '"]')
             link.click()
@@ -183,12 +193,19 @@ def boa_image_scrape(url):
             #</button>
 
 
-#<div class="ui-dv-pdf-container js-pdf-container" style="height:1187px">
-#            <iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe><iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe></div>
+            #<div class="ui-dv-pdf-container js-pdf-container" style="height:1187px">
+            #            <iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe><iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe></div>
 
-            # @todo carry on here
-            pyautogui.moveTo(2445, 175, duration=1)
+            # @todo mdownload button in lite broswer
+            # @todo confirm location
+            pyautogui.moveTo(1934, 292, duration=2)
+           #print(pyautogui. position())
+           #print(pyautogui.position())
             pyautogui.click()
+
+
+
+            #' switch to
 
             #pyautogui.moveTo(2445, 175, duration=1)
 
@@ -304,7 +321,8 @@ volumes = {
     'papers-from-independent-candidates-1970-1987': volume4,
 }
 
-# scrape_directory = "C:/Users/[username]/[path]"
+
+
 scrape_this_url = "https://microform.digital/boa/documents/11165/papers-relating-to-the-anc-1919-1994"
 
 #while True:
@@ -317,7 +335,7 @@ scrape_this_url = "https://microform.digital/boa/documents/11165/papers-relating
         #    while True:
         #        print("Please select a directory to save your scraped files.")
 
-scrape_directory = "D:/shutterscape_output/apartheid-through-the-eyes-of-south-african-political-parties-1948-1994/"
+output_directory = "D:/shutterscape_output"
         # scrape_directory = askDialog()
     #        if scrape_directory == None or scrape_directory == "":
     #            print("You must select a directory to save your scraped files.")
@@ -330,7 +348,37 @@ scrape_directory = "D:/shutterscape_output/apartheid-through-the-eyes-of-south-a
 
 
 # @todo look through volumes for urls and change directory name to volume name ( create if doesn't exist )
-boa_image_scrape(scrape_this_url)
+
+print("starting to scrape...")
+
+# Loop through the volumes and their papers
+for volume, papers in volumes.items():
+    print(f"Volume: {volume}")
+    if not os.path.exists(output_directory + '/' + volume):
+        os.makedirs(output_directory + '/' + volume)
+
+    # Loop through the papers in the current volume
+    for paper, scrape_this_url in papers.items():
+        print(f"  Paper: {paper}")
+        print(f"  URL: {scrape_this_url}")
+        if not os.path.exists(output_directory + '/' + volume + '/' + paper):
+            os.makedirs(output_directory + '/' + volume + '/' + paper)
+
+        # @todo
+        # document_count
+        # check document count against file count in download directory
+        # move downloads to output_directory + '/' + volume + '/' + paper
+
+        # document_count = boa_image_scrape(scrape_this_url)
+
+
+
+    print()  # Add a newline for better readability
+        #
+
+
+
+
 print("Scraping complete.")
 #    restartScrape = inp("Keep scraping? ('y' for yes or 'n' for no) ")
 #    if restartScrape == "n":
