@@ -18,6 +18,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select  # Allows button clicks
 
+import pyautogui
 
 def askDialog():
     return tkinter.filedialog.askdirectory()
@@ -153,7 +154,8 @@ def boa_image_scrape(url):
         # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
         # 	...
 
-
+        pyautogui.moveTo(1569, 1289, duration=1)
+        pyautogui.click()
 
         docs_container = good_soup.find_all('ul', {'class': 'ui-dv-page-list'})
         page_link_counter = 1
@@ -185,13 +187,17 @@ def boa_image_scrape(url):
 #            <iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe><iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe></div>
 
             # @todo carry on here
-            pdf_element = driver.find_element(By.CLASS_NAME, "body")
+            pyautogui.moveTo(2445, 175, duration=1)
+            pyautogui.click()
 
-            action = ActionChains(driver)
+            #pyautogui.moveTo(2445, 175, duration=1)
 
-            xoffset = 2448
-            yoffset = 59
-            action.move_to_element_with_offset(pdf_element, xoffset, yoffset).click().build().pperform()
+#            pdf_element = driver.find_element(By.CLASS_NAME, "body")
+
+#            action = ActionChains(driver)
+
+
+#            action.move_to_element_with_offset(pdf_element, xoffset, yoffset).click().build().pperform()
 
             #action.click_and_hold().perform()
             #action
@@ -203,21 +209,20 @@ def boa_image_scrape(url):
 
             page_link_counter+= 1
 
-        exit()
         # click each document in list
 
         # download a document:
         #   <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
         #       <span data-l10n-id="download_label">Download</span>
         #   </button>
-        for j in range(0, len(documents_to_scrape) - 1):
-            img_src = img_container[j].get("src")
-            name = img_src.rsplit("/", 1)[-1]
-            try:
-                urlretrieve(img_src, os.path.join(scrape_directory, os.path.basename(img_src)))
-                print("Scraped " + name)
-            except Exception as e:
-                print(e)
+        #for j in range(0, len(documents_to_scrape) - 1):
+#            img_src = img_container[j].get("src")
+ #           name = img_src.rsplit("/", 1)[-1]
+  #          try:
+   #             urlretrieve(img_src, os.path.join(scrape_directory, os.path.basename(img_src)))
+    #            print("Scraped " + name)
+     #       except Exception as e:
+      #          print(e)
 
         driver.close()
     except Exception as e:
