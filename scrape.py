@@ -245,7 +245,7 @@ def boa_image_scrape(url):
     #            print("Scraped " + name)
      #       except Exception as e:
       #          print(e)
-
+        time.sleep(3)
         driver.close()
         return page_link_counter
     except Exception as e:
