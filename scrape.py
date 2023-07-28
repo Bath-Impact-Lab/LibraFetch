@@ -1,4 +1,5 @@
 import os
+import shutil
 import ssl
 import time
 import tkinter
@@ -159,12 +160,13 @@ def boa_image_scrape(url):
         pyautogui.moveTo(10, 10, duration=1)
 
         # close GDRP popup
-        pyautogui.moveTo(1569, 1289, duration=2)
+        pyautogui.moveTo(1569, 1289, duration=1)
         pyautogui.click()
 
         # @todo switch to lite viewer to allow filename save
-        pyautogui.moveTo(1569, 1289, duration=2)
+        pyautogui.moveTo(1950, 235, duration=1)
         pyautogui.click()
+        time.sleep(4)
 
 
         docs_container = good_soup.find_all('ul', {'class': 'ui-dv-page-list'})
@@ -176,13 +178,13 @@ def boa_image_scrape(url):
             # remove the "i" from the end of the document name
             #pattern = r"^'|'i$"
             #formatted_document_name = re.sub(pattern, '', document_name)
-            time.sleep(random.randint(1, 3))
+            #time.sleep(1)
             # click this link
             link = driver.find_element(By.CSS_SELECTOR, 'li.ui-dv-page-list__item[data-page-no="' + str(page_link_counter) + '"]')
             link.click()
 
             # sleep for random time between 3 and 9 seconds
-            time.sleep(random.randint(3, 9))
+            time.sleep(0.5) # time.sleep(random.randint(1, 2))
 
             # check document doesn't already exist
 
@@ -196,14 +198,17 @@ def boa_image_scrape(url):
             #<div class="ui-dv-pdf-container js-pdf-container" style="height:1187px">
             #            <iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe><iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe></div>
 
-            # @todo mdownload button in lite broswer
-            # @todo confirm location
-            pyautogui.moveTo(1934, 292, duration=2)
-           #print(pyautogui. position())
-           #print(pyautogui.position())
+            # move to download button in lite browser
+            pyautogui.moveTo(1915, 313, duration=0.5)
             pyautogui.click()
 
+            #time.sleep(1)
 
+            # @todo confirm location
+            pyautogui.moveTo(966, 866, duration=1.5)
+            pyautogui.click()
+
+            #time.sleep(5)
 
             #' switch to
 
@@ -224,7 +229,7 @@ def boa_image_scrape(url):
 
             #document_url = documents_to_click_and_download['href']
 
-            page_link_counter+= 1
+            page_link_counter += 1
 
         # click each document in list
 
@@ -242,6 +247,7 @@ def boa_image_scrape(url):
       #          print(e)
 
         driver.close()
+        return page_link_counter
     except Exception as e:
         print(e)
 
@@ -335,7 +341,8 @@ scrape_this_url = "https://microform.digital/boa/documents/11165/papers-relating
         #    while True:
         #        print("Please select a directory to save your scraped files.")
 
-output_directory = "D:/shutterscape_output"
+output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_boa"
+download_directory = "C:/Users/mrt64/Downloads"
         # scrape_directory = askDialog()
     #        if scrape_directory == None or scrape_directory == "":
     #            print("You must select a directory to save your scraped files.")
@@ -351,6 +358,13 @@ output_directory = "D:/shutterscape_output"
 
 print("starting to scrape...")
 
+# delete all files in output_directory
+for root, dirs, files in os.walk(output_directory):
+    for f in files:
+        os.unlink(os.path.join(root, f))
+    #for d in dirs:
+    #    shutil.rmtree(os.path.join(root, d))
+
 # Loop through the volumes and their papers
 for volume, papers in volumes.items():
     print(f"Volume: {volume}")
@@ -361,22 +375,31 @@ for volume, papers in volumes.items():
     for paper, scrape_this_url in papers.items():
         print(f"  Paper: {paper}")
         print(f"  URL: {scrape_this_url}")
-        if not os.path.exists(output_directory + '/' + volume + '/' + paper):
+        if os.path.exists(output_directory + '/' + volume + '/' + paper):
+            # directory already exists
+            print(f"  Directory already exists: {output_directory + '/' + volume + '/' + paper}")
+            continue # skip to next paper
+        else:
             os.makedirs(output_directory + '/' + volume + '/' + paper)
 
-        # @todo
-        # document_count
-        # check document count against file count in download directory
-        # move downloads to output_directory + '/' + volume + '/' + paper
+            document_count = boa_image_scrape(scrape_this_url)
+            time.sleep(10)  #let all downloads finish
+            downloaded_count = len([name for name in os.listdir(download_directory) if os.path.isfile(name)])
 
-        # document_count = boa_image_scrape(scrape_this_url)
+            print(f"  Downloaded: {downloaded_count}")
+            print(f"  Expected: {document_count}")
 
+            if downloaded_count != document_count:
+                print(f" WARNING! Downloaded count does not match expected count.  Expected: {document_count}  Downloaded: {downloaded_count}")
 
+            # move files in download_directory to output_directory
+            for root, dirs, files in os.walk(download_directory):
+                for f in files:
+                    shutil.move(os.path.join(root, f), output_directory + '/' + volume + '/' + paper + '/' + f)
 
     print()  # Add a newline for better readability
-        #
 
-
+boa_image_scrape(scrape_this_url)
 
 
 print("Scraping complete.")
