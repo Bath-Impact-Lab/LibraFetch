@@ -31,6 +31,9 @@ def inp(text):
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
+output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_boa"
+download_directory = "C:/Users/mrt64/Downloads"
+
 
 def shutterstock_videoscrape():
     try:
@@ -128,7 +131,7 @@ def shutterstock_imagescrape():
         print(e)
 
 
-def boa_image_scrape(url):
+def boa_image_scrape(url, download_dir, output_dir):
     try:
         webdriver_options = Options()
         #webdriver_options.add_argument('--headless')
@@ -207,6 +210,14 @@ def boa_image_scrape(url):
             # @todo confirm location
             pyautogui.moveTo(966, 866, duration=1.5)
             pyautogui.click()
+
+            time.sleep(3)
+
+            # move files in download_directory to output_directory
+            for root, dirs, files in os.walk(download_dir):
+                for f in files:
+                    # prefix downloaded file with page_link_counter so that they are in order
+                    shutil.move(os.path.join(root, f), output_dir + '/' + str(page_link_counter) + '_' + f)
 
             #time.sleep(5)
 
@@ -341,8 +352,7 @@ scrape_this_url = "https://microform.digital/boa/documents/11165/papers-relating
         #    while True:
         #        print("Please select a directory to save your scraped files.")
 
-output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_boa"
-download_directory = "C:/Users/mrt64/Downloads"
+
         # scrape_directory = askDialog()
     #        if scrape_directory == None or scrape_directory == "":
     #            print("You must select a directory to save your scraped files.")
@@ -358,12 +368,11 @@ download_directory = "C:/Users/mrt64/Downloads"
 
 print("starting to scrape...")
 
-# delete all files in output_directory
-for root, dirs, files in os.walk(output_directory):
+
+# delete all files in download_directory
+for root, dirs, files in os.walk(download_directory):
     for f in files:
         os.unlink(os.path.join(root, f))
-    #for d in dirs:
-    #    shutil.rmtree(os.path.join(root, d))
 
 # Loop through the volumes and their papers
 for volume, papers in volumes.items():
@@ -377,14 +386,14 @@ for volume, papers in volumes.items():
         print(f"  URL: {scrape_this_url}")
         if os.path.exists(output_directory + '/' + volume + '/' + paper):
             # directory already exists
-            print(f"  Directory already exists: {output_directory + '/' + volume + '/' + paper}")
+            print(f" SKIPPING -  Directory already exists: {output_directory + '/' + volume + '/' + paper}")
             continue # skip to next paper
         else:
             os.makedirs(output_directory + '/' + volume + '/' + paper)
 
-            document_count = boa_image_scrape(scrape_this_url)
-            time.sleep(10)  #let all downloads finish
-            downloaded_count = len([name for name in os.listdir(download_directory) if os.path.isfile(name)])
+            document_count = boa_image_scrape(scrape_this_url, download_directory, output_directory + '/' + volume + '/' + paper )
+            time.sleep(2)  #let all downloads finish
+            downloaded_count = len([name for name in os.listdir(output_directory + '/' + volume + '/' + paper) if os.path.isfile(name)])
 
             print(f"  Downloaded: {downloaded_count}")
             print(f"  Expected: {document_count}")
@@ -393,9 +402,9 @@ for volume, papers in volumes.items():
                 print(f" WARNING! Downloaded count does not match expected count.  Expected: {document_count}  Downloaded: {downloaded_count}")
 
             # move files in download_directory to output_directory
-            for root, dirs, files in os.walk(download_directory):
-                for f in files:
-                    shutil.move(os.path.join(root, f), output_directory + '/' + volume + '/' + paper + '/' + f)
+            #for root, dirs, files in os.walk(download_directory):
+            #    for f in files:
+            #        shutil.move(os.path.join(root, f), output_directory + '/' + volume + '/' + paper + '/' + f)
 
     print()  # Add a newline for better readability
 
