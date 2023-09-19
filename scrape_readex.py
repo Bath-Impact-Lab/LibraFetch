@@ -35,7 +35,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_newsbank"
 download_directory = "C:/Users/mrt64/Downloads"
 
-def download_this_page(download_dir, driver, good_soup):
+def download_this_page(download_dir, output_dir, driver, good_soup):
 
     data = driver.execute_script("return document.documentElement.outerHTML")
     print("Extracting documents")
@@ -51,25 +51,44 @@ def download_this_page(download_dir, driver, good_soup):
     for search_hit in search_hits:
 
         # <div class="search-hit__hit-number">       1      </div>
+        result_number = int( search_hit.find("div", "search-hit__hit-number").text.replace(' ', '') )
+
         # <div class="search-hit__title">
         #         <a href="/apps/readex/doc?p=HN-SARDM&amp;sort=YMD_date%3AA&amp;fld-nav-0=YMD_date&amp;val-nav-0=1940%20-%201999&amp;f=advanced&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=native&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext&amp;docref=image/v2%3A135DEF57238F5FC5%40EANX-15EDB9864F2C0C68%402429634-15ED19F4ED007648%4011-15ED19F4ED007648%40&amp;firsthit=yes" title="Go to document viewer for News Article">News Article</a>
         #         <span class="search-hit__title-meta">
         #           page 12
         #           </span>
+
+        result_source_page_number = search_hit.find("span", "search-hit__title-meta").text
+        result_source_page_number = re.search(r"page (\d+)", result_source_page_number).group()
+
+
         # </div>
         #     <div class="search-hit__collection">
+
+        document_info = search_hit.find("div", "search-hit__collection").find("table").find_all("td")
+
         #       <table>
         #               <tbody><tr class="meta-field__display_date">
         #                                 <td class="meta__label">Date</td>
         #             <td class="meta__value">January 5, 1940                          </td>
         #                   </tr>
+
+        result_source_date = document_info[1].text
+        result_source_date = str(result_source_date).strip()
+            #search_hit.find("td", "meta__value").text)
+
         #               <tr class="meta-field__source">
         #                                 <td class="meta__label">Source</td>
         #             <td class="meta__value"><div class="search-hit-source">
         #               <span class="current-title">
         #                 Rand Daily Mail
         #               </span>
-        #
+
+        result_source_news_title = str(document_info[3].text).strip()
+
+            #search_hit.find("span", "current-title").text)
+
         #                 <span class="published-as">
         #                   (published as
         #                   <span class="original-title">RAND DAILY MAIL</span>)
@@ -80,10 +99,15 @@ def download_this_page(download_dir, driver, good_soup):
         #                                 <td class="meta__label">Place(s) of Publication</td>
         #             <td class="meta__value">Johannesburg, South Africa                          </td>
         #                   </tr>
+
+        result_source_publication_location = str(document_info[5].text).strip()
+        result_source_publication_location = re.search(r"(\w+)\n", result_source_publication_location).group()
+        #search_hit.find("td", "meta__value").text
+
         #           </tbody></table>
         #           </div>
 
-        title = search_hit.find("div", "search-hit__title")
+        title = search_hit.find("class", "search-hit__title")
 
         # open document viewer
         # # <div class="search-hit__title">
@@ -128,8 +152,7 @@ def readex_image_scrape(url, download_dir, output_dir):
         if login_container:
             if os.getenv("BRITISH_LIBRARY_USERNAME") is None:
                 load_dotenv(find_dotenv(raise_error_if_not_found=True))
-            print("debug...")
-            print(os.getenv("BRITISH_LIBRARY_USERNAME"))
+            print("Signing in as:" + os.getenv("BRITISH_LIBRARY_USERNAME"))
             USERNAME = os.getenv("BRITISH_LIBRARY_USERNAME")
             PASSWORD = os.getenv("BRITISH_LIBRARY_PASSWORD")
 
@@ -149,7 +172,7 @@ def readex_image_scrape(url, download_dir, output_dir):
 
         download_count = 0
 
-        download_count += download_this_page(download_dir, driver, good_soup)
+        download_count += download_this_page(download_dir, output_dir, driver, good_soup)
 
         # find a tag with title = "Go to next page"
         is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
@@ -160,105 +183,17 @@ def readex_image_scrape(url, download_dir, output_dir):
             next_page_link.click()
             time.sleep(15)
 
-            download_count += download_this_page(download_dir, driver, good_soup)
+            download_count += download_this_page(download_dir, output_dir, driver, good_soup)
             # check if there is a next page
             is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
 
-
-
-
-
-        pyautogui.FAILSAFE = False
-        pyautogui.moveTo(10, 10, duration=1)
-
-        # close GDRP popup
-        pyautogui.moveTo(1569, 1289, duration=1)
-        pyautogui.click()
-
-        # @todo switch to lite viewer to allow filename save
-        pyautogui.moveTo(1950, 235, duration=1)
-        pyautogui.click()
-        time.sleep(4)
-
-
-        docs_container = good_soup.find_all('ul', {'class': 'ui-dv-page-list'})
-        page_link_counter = 1
-        for documents_to_click_and_download in docs_container[0].find_all('li', {'class': 'ui-dv-page-list__item'}):
-            #@todo continue here
-            document_name = documents_to_click_and_download.text
-
-            # remove the "i" from the end of the document name
-            #pattern = r"^'|'i$"
-            #formatted_document_name = re.sub(pattern, '', document_name)
-            #time.sleep(1)
-            # click this link
-            link = driver.find_element(By.CSS_SELECTOR, 'li.ui-dv-page-list__item[data-page-no="' + str(page_link_counter) + '"]')
-            link.click()
-
-            # sleep for random time between 3 and 9 seconds
-            time.sleep(0.5) # time.sleep(random.randint(1, 2))
-
-            # check document doesn't already exist
-
-
-            #   click download button
-
-            # move to download button in lite browser
-            pyautogui.moveTo(1915, 313, duration=0.5)
-            pyautogui.click()
-
-            #time.sleep(1)
-
-            # @todo confirm location
-            pyautogui.moveTo(966, 866, duration=1.5)
-            pyautogui.click()
-
-            time.sleep(3)
-
-
-
-            #time.sleep(5)
-
-            #' switch to
-
-            #pyautogui.moveTo(2445, 175, duration=1)
-
-#            pdf_element = driver.find_element(By.CLASS_NAME, "body")
-
-#            action = ActionChains(driver)
-
-
-#            action.move_to_element_with_offset(pdf_element, xoffset, yoffset).click().build().pperform()
-
-            #action.click_and_hold().perform()
-            #action
-
-            #download_link = driver.find_element(By.CLASS_NAME, "download")
-            ##download_link.click()
-
-            #document_url = documents_to_click_and_download['href']
-
-            page_link_counter += 1
-
-        # click each document in list
-
-        # download a document:
-        #   <button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download">
-        #       <span data-l10n-id="download_label">Download</span>
-        #   </button>
-        #for j in range(0, len(documents_to_scrape) - 1):
-#            img_src = img_container[j].get("src")
- #           name = img_src.rsplit("/", 1)[-1]
-  #          try:
-   #             urlretrieve(img_src, os.path.join(scrape_directory, os.path.basename(img_src)))
-    #            print("Scraped " + name)
-     #       except Exception as e:
-      #          print(e)
-        time.sleep(3)
         driver.close()
-        return page_link_counter
+
+        return download_count
+
     except Exception as e:
         print(e)
+
 '''
     if os.path.exists(output_directory + '/' + volume + '/' + paper):
         # directory already exists
