@@ -35,12 +35,78 @@ ssl._create_default_https_context = ssl._create_unverified_context
 output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_newsbank"
 download_directory = "C:/Users/mrt64/Downloads"
 
+def download_this_page(download_dir, driver, good_soup):
+
+    data = driver.execute_script("return document.documentElement.outerHTML")
+    print("Extracting documents")
+    good_soup = BeautifulSoup(data, "lxml")
+
+    # Parse each page of search results until there is no next page
+    search_results_this_page = good_soup.find_all("div", "search-hits")
+
+    # get all classes called search-hit
+    search_hits = search_results_this_page[0].find_all("div", "search-hit")
+
+    # for each result
+    for search_hit in search_hits:
+
+        # <div class="search-hit__hit-number">       1      </div>
+        # <div class="search-hit__title">
+        #         <a href="/apps/readex/doc?p=HN-SARDM&amp;sort=YMD_date%3AA&amp;fld-nav-0=YMD_date&amp;val-nav-0=1940%20-%201999&amp;f=advanced&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=native&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext&amp;docref=image/v2%3A135DEF57238F5FC5%40EANX-15EDB9864F2C0C68%402429634-15ED19F4ED007648%4011-15ED19F4ED007648%40&amp;firsthit=yes" title="Go to document viewer for News Article">News Article</a>
+        #         <span class="search-hit__title-meta">
+        #           page 12
+        #           </span>
+        # </div>
+        #     <div class="search-hit__collection">
+        #       <table>
+        #               <tbody><tr class="meta-field__display_date">
+        #                                 <td class="meta__label">Date</td>
+        #             <td class="meta__value">January 5, 1940                          </td>
+        #                   </tr>
+        #               <tr class="meta-field__source">
+        #                                 <td class="meta__label">Source</td>
+        #             <td class="meta__value"><div class="search-hit-source">
+        #               <span class="current-title">
+        #                 Rand Daily Mail
+        #               </span>
+        #
+        #                 <span class="published-as">
+        #                   (published as
+        #                   <span class="original-title">RAND DAILY MAIL</span>)
+        #                 </span>
+        #               </div>                          </td>
+        #                   </tr>
+        #               <tr class="meta-field__publication_location">
+        #                                 <td class="meta__label">Place(s) of Publication</td>
+        #             <td class="meta__value">Johannesburg, South Africa                          </td>
+        #                   </tr>
+        #           </tbody></table>
+        #           </div>
+
+        title = search_hit.find("div", "search-hit__title")
+
+        # open document viewer
+        # # <div class="search-hit__title">
+        #         #         <a href="/apps/readex/doc?p=HN-SARDM&amp;sort=YMD_date%3AA&amp;fld-nav-0=YMD_date&amp;val-nav-0=1940%20-%201999&amp;f=advanced&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=native&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext&amp;docref=image/v2%3A135DEF57238F5FC5%40EANX-15EDB9864F2C0C68%402429634-15ED19F4ED007648%4011-15ED19F4ED007648%40&amp;firsthit=yes" title="Go to document viewer for News Article">News Article</a>
+        #
+
+        # download document
+
+        # move files in download_directory to output_directory
+        for root, dirs, files in os.walk(download_dir):
+            for f in files:
+                # prefix downloaded file with page_link_counter so that they are in order
+                shutil.move(os.path.join(root, f), output_dir + '/' + str(page_link_counter) + '_' + f)
+
+
 def readex_image_scrape(url, download_dir, output_dir):
     try:
         webdriver_options = Options()
         #webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
         webdriver_options.add_argument('--disable-dev-shm-usage')
+        folder_path_to_store_session = "C:/Users/mrt64/AppData/Local/Google/Chrome/User Data"
+        webdriver_options.add_argument("--user-data-dir=" + folder_path_to_store_session)
 
         # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
 
@@ -79,11 +145,27 @@ def readex_image_scrape(url, download_dir, output_dir):
 
         good_soup = BeautifulSoup(data, "lxml")
 
-        expected_download_count = driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', '')
+        expected_download_count = int( driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', '') )
 
-        search_results_this_page = good_soup.find_all("div","search-hits")
+        download_count = 0
 
-        # Find the List of documents to scrape:
+        download_count += download_this_page(download_dir, driver, good_soup)
+
+        # find a tag with title = "Go to next page"
+        is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+
+        while is_there_a_next_page:
+            # click next page
+            next_page_link = driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+            next_page_link.click()
+            time.sleep(15)
+
+            download_count += download_this_page(download_dir, driver, good_soup)
+            # check if there is a next page
+            is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+
+
+
 
 
         pyautogui.FAILSAFE = False
@@ -120,13 +202,6 @@ def readex_image_scrape(url, download_dir, output_dir):
 
 
             #   click download button
-            #<button id="download" class="toolbarButton download hiddenMediumView" title="Download" tabindex="34" data-l10n-id="download" >
-            #    <span data-l10n-id="download_label">Download </span>
-            #</button>
-
-
-            #<div class="ui-dv-pdf-container js-pdf-container" style="height:1187px">
-            #            <iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe><iframe width="100%" height="100%" frameborder="0" title="Document viewer" src="/boa/pdfjs/viewer.html" data-lf-form-tracking-inspected-dzlr5a50aqy4boq2="true" data-lf-yt-playback-inspected-dzlr5a50aqy4boq2="true" data-lf-vimeo-playback-inspected-dzlr5a50aqy4boq2="true"></iframe></div>
 
             # move to download button in lite browser
             pyautogui.moveTo(1915, 313, duration=0.5)
@@ -140,11 +215,7 @@ def readex_image_scrape(url, download_dir, output_dir):
 
             time.sleep(3)
 
-            # move files in download_directory to output_directory
-            for root, dirs, files in os.walk(download_dir):
-                for f in files:
-                    # prefix downloaded file with page_link_counter so that they are in order
-                    shutil.move(os.path.join(root, f), output_dir + '/' + str(page_link_counter) + '_' + f)
+
 
             #time.sleep(5)
 
@@ -211,8 +282,16 @@ def readex_image_scrape(url, download_dir, output_dir):
                 shutil.move(os.path.join(root, f), output_directory + '/' + volume + '/' + paper + '/' + f)
 '''
 
+
+
+
 scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&sort=YMD_date%3AA&fld-nav-0=YMD_date&val-nav-0=1940%20-%201999&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
 #scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/news/results?sort=YMD_date%3AD&p=WORLDNEWS&t=pubname%3A16ED7D43CFB7D6F4%21Sunday%2BTimes&maxresults=20&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=coloured&fld-base-2=alltext&bln-base-3=and&val-base-3=bantu&fld-base-3=alltext&fld-nav-1=YMD_date&val-nav-1=1940%20-%201999"
+
+#test url
+scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?page=2&p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
+
+
 
 print("starting to scrape...")
 
