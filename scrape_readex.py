@@ -20,6 +20,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select  # Allows button clicks
 
 import pyautogui
+from dotenv import load_dotenv, find_dotenv
 
 def askDialog():
     return tkinter.filedialog.askdirectory()
@@ -56,12 +57,35 @@ def readex_image_scrape(url, download_dir, output_dir):
         print("Extracting documents")
         good_soup = BeautifulSoup(data, "lxml")
 
+        # Check if me need to login find id  = btnLoginReg
+        login_container = good_soup.find_all(id="btnLoginReg") # good_soup.find_all('id', {'id': 'username'})
+        if login_container:
+            if os.getenv("BRITISH_LIBRARY_USERNAME") is None:
+                load_dotenv(find_dotenv(raise_error_if_not_found=True))
+            print("debug...")
+            print(os.getenv("BRITISH_LIBRARY_USERNAME"))
+            USERNAME = os.getenv("BRITISH_LIBRARY_USERNAME")
+            PASSWORD = os.getenv("BRITISH_LIBRARY_PASSWORD")
+
+            # fill out username and password
+            username = driver.find_element(By.ID, "username")
+            username.send_keys(USERNAME)
+            password = driver.find_element(By.ID, "password")
+            password.send_keys(PASSWORD)
+            # click login button
+            login_button = driver.find_element(By.ID, "btnLoginReg")
+            login_button.click()
+            time.sleep(3)
+
+        good_soup = BeautifulSoup(data, "lxml")
+
+        expected_download_count = driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', '')
+
+        search_results_this_page = good_soup.find_all("div","search-hits")
+
         # Find the List of documents to scrape:
-        #
-        # <ul class="o-list-bare ui-dv-page-list js-page-list" style="height:1022px">
-        # 	<li class="ui-dv-page-list__item" data-page-no="1"><a class="ui-dv-page-list__link js-page-link" data-page-no="1"><span>img 1: Constitution of the ANC (1919)</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
-        # 	<li class="ui-dv-page-list__item is-selected" data-page-no="2"><a class="ui-dv-page-list__link js-page-link is-selected" data-page-no="2"><span>img 2:</span><span class="ui-dv-page-list__meta-info u-d-none u-d-inline-block@desktop js-page-link-tippy" data-tippy="" data-original-title="<strong>Contributor</strong>: Senate House Library, University of London  &amp; ICS<br /><strong>Archive Reference</strong>: -">i</span></a></li>
-        # 	...
+
+
         pyautogui.FAILSAFE = False
         pyautogui.moveTo(10, 10, duration=1)
 
