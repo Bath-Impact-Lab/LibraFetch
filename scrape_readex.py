@@ -11,6 +11,7 @@ from urllib.request import urlretrieve
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -32,7 +33,7 @@ def inp(text):
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_newsbank/test"
+output_directory = 'C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scrapped_newsbank/test'
 download_directory = "C:/Users/mrt64/Downloads"
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
@@ -57,7 +58,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
 
         # check if we have already downloaded a file starting with this result_number
         skip_this_result = False
-        for root, dirs, files in os.walk(download_dir):
+        for root, dirs, files in os.walk(output_dir):
             for f in files:
                 if f.startswith(str(result_number).zfill(4) + '_'):
                     # file already exists
@@ -193,18 +194,15 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         #download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
         #download_button.click()
 
-        button_x = 100
-        button_y = 100
-
         pyautogui.FAILSAFE = False
-        pyautogui.moveTo(button_x, button_y, duration=1)
+        pyautogui.moveTo(1259, 441, duration=1)
         pyautogui.click()
 
         # close GDRP popup
-        pyautogui.moveTo(button_x+100, button_y+100, duration=1)
+        pyautogui.moveTo(662, 582, duration=1)
         pyautogui.click()
 
-        time.sleep(4)
+        time.sleep(15)
 
         # move files in download_directory to output_directory
         for root, dirs, files in os.walk(download_dir):
@@ -224,11 +222,13 @@ def readex_image_scrape(url, download_dir, output_dir):
 
         # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
 
-        s = Service('chromedriver/chromedriver')
+        #driver = webdriver.Chrome(ChromeDriverManager().install())
+        #s = Service('chromedriver/chromedriver')
+        s = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=s, options=webdriver_options)
 
-        #driver.maximize_window()
-        driver.set_window_size(1400, 1000)
+        driver.maximize_window()
+        #driver.set_window_size(1400, 1000)
 
         driver.get(url)
 #        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
@@ -261,6 +261,10 @@ def readex_image_scrape(url, download_dir, output_dir):
         expected_download_count = int( driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', '') )
 
         download_count = 0
+
+        #position = pyautogui.position()
+        #position = pyautogui.position()
+        #position = pyautogui.position()
 
         download_count += download_this_page(download_dir, output_dir, driver, good_soup)
 

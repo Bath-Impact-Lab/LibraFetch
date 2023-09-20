@@ -4,3 +4,4 @@ lxml
 chromedriver-py
 pyautogui
 python-dotenv
+webdriver-manager
