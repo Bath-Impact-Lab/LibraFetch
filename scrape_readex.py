@@ -32,7 +32,7 @@ def inp(text):
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_newsbank"
+output_directory = "C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scraped_newsbank/test"
 download_directory = "C:/Users/mrt64/Downloads"
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
