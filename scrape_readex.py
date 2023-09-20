@@ -169,9 +169,9 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # wait for download to finish
         #time.sleep(5)
 
-        data = driver.execute_script("return document.documentElement.outerHTML")
+        #data = driver.execute_script("return document.documentElement.outerHTML")
         #print("Extracting documents")
-        better_soup = BeautifulSoup(data, "lxml")
+        #better_soup = BeautifulSoup(data, "lxml")
 
         # Download button click
 
@@ -183,16 +183,28 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # </svg>
         # <span class="tooltip">Download or Save to Google Drive</span></button>
 
-        menu_download_button = better_soup.find("")
+        #menu_download_button = better_soup.find("")
             #"button", class_="actions-bar__button actions-bar__button--download")
 
-        menu_download_button = better_soup.find("button", class_="actions-bar__button actions-bar__button--download")
-        menu_download_button.click()
+        #menu_download_button = better_soup.find("button", class_="actions-bar__button actions-bar__button--download")
+        #menu_download_button.click()
 
         # <button class="download-current pdf-action download-icon s-button" data-action="download" data-batchnum="-1"> Download Page  </button>
-        download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
-        download_button.click()
+        #download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
+        #download_button.click()
 
+        button_x = 100
+        button_y = 100
+
+        pyautogui.FAILSAFE = False
+        pyautogui.moveTo(button_x, button_y, duration=1)
+        pyautogui.click()
+
+        # close GDRP popup
+        pyautogui.moveTo(button_x+100, button_y+100, duration=1)
+        pyautogui.click()
+
+        time.sleep(4)
 
         # move files in download_directory to output_directory
         for root, dirs, files in os.walk(download_dir):
