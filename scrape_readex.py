@@ -47,9 +47,11 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
 
     # get all classes called search-hit
     search_hits = search_results_this_page[0].find_all("div", "search-hit")
-
+    documents_parsed = 0
     # for each result
     for search_hit in search_hits:
+
+        documents_parsed += 1
 
         time.sleep(1)
 
@@ -209,7 +211,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
             for f in files:
                 # prefix downloaded file with page_link_counter so that they are in order
                 shutil.move(os.path.join(root, f), output_dir + '/' + str(result_number).zfill(4) + '_' + f)
-
+    return documents_parsed
 
 def readex_image_scrape(url, download_dir, output_dir):
     try:
@@ -318,8 +320,7 @@ scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN
 #scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/news/results?sort=YMD_date%3AD&p=WORLDNEWS&t=pubname%3A16ED7D43CFB7D6F4%21Sunday%2BTimes&maxresults=20&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=coloured&fld-base-2=alltext&bln-base-3=and&val-base-3=bantu&fld-base-3=alltext&fld-nav-1=YMD_date&val-nav-1=1940%20-%201999"
 
 #test url
-scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?page=2&p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
-
+scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
 
 
 print("starting to scrape...")
