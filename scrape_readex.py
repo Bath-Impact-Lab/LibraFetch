@@ -50,9 +50,29 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
     # for each result
     for search_hit in search_hits:
 
+        time.sleep(1)
+
         # <div class="search-hit__hit-number">       1      </div>
         result_number = int( search_hit.find("div", "search-hit__hit-number").text.replace(' ', '') )
 
+        # check if we have already downloaded a file starting with this result_number
+        skip_this_result = False
+        for root, dirs, files in os.walk(download_dir):
+            for f in files:
+                if f.startswith(str(result_number).zfill(4) + '_'):
+                    # file already exists
+                    print(f" SKIPPING -  File already exists: {f}")
+                    skip_this_result = True
+                    continue
+
+        if skip_this_result:
+            continue
+
+        # clear download directory
+        for root, dirs, files in os.walk(download_dir):
+            for f in files:
+                os.unlink(os.path.join(root, f))
+        '''
         # <div class="search-hit__title">
         #         <a href="/apps/readex/doc?p=HN-SARDM&amp;sort=YMD_date%3AA&amp;fld-nav-0=YMD_date&amp;val-nav-0=1940%20-%201999&amp;f=advanced&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=native&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext&amp;docref=image/v2%3A135DEF57238F5FC5%40EANX-15EDB9864F2C0C68%402429634-15ED19F4ED007648%4011-15ED19F4ED007648%40&amp;firsthit=yes" title="Go to document viewer for News Article">News Article</a>
         #         <span class="search-hit__title-meta">
@@ -60,7 +80,9 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         #           </span>
 
         result_source_page_number = search_hit.find("span", "search-hit__title-meta").text
-        result_source_page_number = re.search(r"page (\d+)", result_source_page_number).group()
+        match = re.search(r"page (\d+)", result_source_page_number)
+        if match:
+            result_source_page_number = match.group()
 
 
         # </div>
@@ -86,7 +108,10 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         #               </span>
 
         result_source_news_title = str(document_info[3].text).strip()
-
+        match = re.search(r"([a-zA-Z0-9_ ]*)\n", result_source_news_title)
+        if match:
+            result_source_news_title = match.group()
+        result_source_news_title = str(result_source_news_title).replace('\n', '')
             #search_hit.find("span", "current-title").text)
 
         #                 <span class="published-as">
@@ -101,26 +126,79 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         #                   </tr>
 
         result_source_publication_location = str(document_info[5].text).strip()
-        result_source_publication_location = re.search(r"(\w+)\n", result_source_publication_location).group()
+        match = re.search(r"(\w+)\n", result_source_publication_location)
+        if match:
+            result_source_publication_location = match.group()
+
+        document_title = str(result_number).zfill(4) + "_" + result_source_date  + "_" + result_source_publication_location + "_" + result_source_page_number + "_" + result_source_news_title
+        document_title = document_title.replace(' ', '-').replace('\n', '').replace(',', '')
+        '''
         #search_hit.find("td", "meta__value").text
 
         #           </tbody></table>
         #           </div>
 
-        title = search_hit.find("class", "search-hit__title")
-
         # open document viewer
         # # <div class="search-hit__title">
         #         #         <a href="/apps/readex/doc?p=HN-SARDM&amp;sort=YMD_date%3AA&amp;fld-nav-0=YMD_date&amp;val-nav-0=1940%20-%201999&amp;f=advanced&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=native&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext&amp;docref=image/v2%3A135DEF57238F5FC5%40EANX-15EDB9864F2C0C68%402429634-15ED19F4ED007648%4011-15ED19F4ED007648%40&amp;firsthit=yes" title="Go to document viewer for News Article">News Article</a>
         #
+        document_url = search_hit.find('a', {'title': 'Go to document viewer for News Article'})['href']
+        document_url = "https://eresources.remote.bl.uk:2159" + document_url
+
+        # open document viewer
+        driver.get(document_url)
+        time.sleep(3)
+
+
+
+        #driver.find_element(By.CLASS_NAME, "actions-bar__button actions-bar__button--download").click()
+            #"actions-bar__button actions-bar__button--download").click()
 
         # download document
+        # <button class="download-current pdf-action download-icon s-button" data-action="download" data-batchnum="-1"> Download Page  </button>
+
+        #driver.find_element(By.CLASS_NAME, "download-current pdf-action download-icon s-button").click()
+        #download_link_to_click = driver.find_element(By.XPATH('//button[@class="download-current pdf-action download-icon s-button"]'))
+        # perform click
+        #download_link_to_click.click()
+
+        # link_to_click = driver.find_element_by_xpath("//button[@class='download-current pdf-action download-icon s-button']")
+        # perform click
+        # link_to_click.click()
+
+        # wait for download to finish
+        #time.sleep(5)
+
+        data = driver.execute_script("return document.documentElement.outerHTML")
+        #print("Extracting documents")
+        better_soup = BeautifulSoup(data, "lxml")
+
+        # Download button click
+
+        # <button class="actions-bar__button actions-bar__button--download" type="button" aria-controls="actions-bar__drawer--download" aria-expanded="false"><svg width="15px" height="18px" viewBox="0 0 15 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        #   <title>Download</title>
+        #   <g id="Page-Download" stroke="none" stroke-width="1" fill="#FFFFFF" fill-rule="evenodd">
+        #       <path d="M4.28571429,0 L4.28571429,6.35328722 L0,6.35328722 L7.5,13.7644752 L15,6.35328722 L10.7142857,6.35328722 L10.7142857,0 L4.28571429,0 Z M0,18 L15,18 L15,15.8822376 L0,15.8822376 L0,18 Z"></path>
+        #   </g>
+        # </svg>
+        # <span class="tooltip">Download or Save to Google Drive</span></button>
+
+        menu_download_button = better_soup.find("")
+            #"button", class_="actions-bar__button actions-bar__button--download")
+
+        menu_download_button = better_soup.find("button", class_="actions-bar__button actions-bar__button--download")
+        menu_download_button.click()
+
+        # <button class="download-current pdf-action download-icon s-button" data-action="download" data-batchnum="-1"> Download Page  </button>
+        download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
+        download_button.click()
+
 
         # move files in download_directory to output_directory
         for root, dirs, files in os.walk(download_dir):
             for f in files:
                 # prefix downloaded file with page_link_counter so that they are in order
-                shutil.move(os.path.join(root, f), output_dir + '/' + str(page_link_counter) + '_' + f)
+                shutil.move(os.path.join(root, f), output_dir + '/' + str(result_number).zfill(4) + '_' + f)
 
 
 def readex_image_scrape(url, download_dir, output_dir):
@@ -129,8 +207,8 @@ def readex_image_scrape(url, download_dir, output_dir):
         #webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
         webdriver_options.add_argument('--disable-dev-shm-usage')
-        folder_path_to_store_session = "C:/Users/mrt64/AppData/Local/Google/Chrome/User Data"
-        webdriver_options.add_argument("--user-data-dir=" + folder_path_to_store_session)
+        folder_path_to_store_session = "C:\\Users\\mrt64\\AppData\\Local\\Google\\Chrome\\User Data"
+        webdriver_options.add_argument("user-data-dir=" + folder_path_to_store_session)
 
         # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
 
