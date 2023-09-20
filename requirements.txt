@@ -2,3 +2,5 @@ beautifulsoup4
 selenium
 lxml
 chromedriver-py
+pyautogui
+dotenv
