@@ -3,4 +3,4 @@ selenium
 lxml
 chromedriver-py
 pyautogui
-dotenv
+python-dotenv
