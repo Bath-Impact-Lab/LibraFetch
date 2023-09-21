@@ -39,6 +39,10 @@ download_directory = "C:/Users/mrt64/Downloads"
 
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
+
+    time.sleep(3)
+    return 10
+
     data = driver.execute_script("return document.documentElement.outerHTML")
     print("Extracting documents")
     good_soup = BeautifulSoup(data, "lxml")
@@ -195,7 +199,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         pyautogui.moveTo(1259, 441, duration=0)
         pyautogui.click()
 
-        # close GDRP popup
+        # download document
         pyautogui.moveTo(662, 582, duration=1)
         pyautogui.click()
 
@@ -211,6 +215,9 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
 
 def readex_image_scrape(url, download_dir, output_dir):
     try:
+        ################################################################################################################
+        # Set up webdriver
+        print("Starting WebScraper 🌐➡📚")
         webdriver_options = Options()
         # webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
@@ -226,11 +233,15 @@ def readex_image_scrape(url, download_dir, output_dir):
 
         driver.get(url)
         # driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
-        time.sleep(3)  # Wait for all the images to load
-        data = driver.execute_script("return document.documentElement.outerHTML")
-        print("Extracting documents")
-        good_soup = BeautifulSoup(data, "lxml")
 
+        time.sleep(6)  # Wait for all the images to load
+
+        data = driver.execute_script("return document.documentElement.outerHTML")
+        good_soup = BeautifulSoup(data, "lxml")
+        #
+        ################################################################################################################
+
+        ################################################################################################################
         # Check if we need to log in - find id=btnLoginReg
         login_container = good_soup.find_all(id="btnLoginReg")  # good_soup.find_all('id', {'id': 'username'})
         if login_container:
@@ -248,35 +259,53 @@ def readex_image_scrape(url, download_dir, output_dir):
             # click login button
             login_button = driver.find_element(By.ID, "btnLoginReg")
             login_button.click()
-            time.sleep(3)
+            time.sleep(10)
+        #
+        ################################################################################################################
 
+        ################################################################################################################
+        # Traverse the pages needed to be downloaded
+
+        # open the last page we visited and continue
+        if os.path.exists(output_dir + '/visited_urls.txt'):
+            with open(output_dir + '/visited_urls.txt', 'r') as f:
+                lines = f.readlines()
+                last_line = lines[-1]
+                driver.get(last_line)
+                time.sleep(6)
+
+        data = driver.execute_script("return document.documentElement.outerHTML")
         good_soup = BeautifulSoup(data, "lxml")
 
-        expected_download_count = int(
-            driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', ''))
+        expected_download_count = int(driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', ''))
 
         download_count = 0
-
         download_count += download_this_page(download_dir, output_dir, driver, good_soup)
 
         # find a tag with title = "Go to next page"
         is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
 
         while is_there_a_next_page:
-            # < a title = "Go to next page"
-            # href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
             # click next page
+            #  < a title = "Go to next page" href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
             driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]').click()
+            data = driver.execute_script("return document.documentElement.outerHTML")
+            good_soup = BeautifulSoup(data, "lxml")
 
             # append the href url to a file
             with open(output_dir + '/visited_urls.txt', 'a') as f:
-                f.write(driver.current_url)
+                f.write(driver.current_url + '\n')
 
             time.sleep(10)
 
             download_count += download_this_page(download_dir, output_dir, driver, good_soup)
             # check if there is a next page
             is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+        #
+        ################################################################################################################
+
+        if expected_download_count != download_count:
+            print(f" WARNING! Downloaded count does not match expected count.  Expected: {expected_download_count}  Downloaded: {download_count}")
 
         driver.close()
 
