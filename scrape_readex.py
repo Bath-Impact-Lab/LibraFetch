@@ -33,7 +33,7 @@ def inp(text):
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-output_directory = 'C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scrapped_newsbank/test'
+output_directory = 'C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scrapped_newsbank/Rand_Daily_Mail'
 download_directory = "C:/Users/mrt64/Downloads"
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
@@ -150,7 +150,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
 
         # open document viewer
         driver.get(document_url)
-        time.sleep(3)
+        time.sleep(1)
 
 
 
@@ -197,14 +197,14 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         #download_button.click()
 
         pyautogui.FAILSAFE = False
-        pyautogui.moveTo(1259, 441, duration=1)
+        pyautogui.moveTo(1259, 441, duration=0)
         pyautogui.click()
 
         # close GDRP popup
         pyautogui.moveTo(662, 582, duration=1)
         pyautogui.click()
 
-        time.sleep(15)
+        time.sleep(5)
 
         # move files in download_directory to output_directory
         for root, dirs, files in os.walk(download_dir):
@@ -274,10 +274,20 @@ def readex_image_scrape(url, download_dir, output_dir):
         is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
 
         while is_there_a_next_page:
+
+            # < a title = "Go to next page"
+            # href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
             # click next page
-            next_page_link = driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]')
-            next_page_link.click()
-            time.sleep(15)
+            driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]').click()
+
+            # append the href url to a file
+            with open(output_dir + '/visited_urls.txt', 'a') as f:
+                f.write(driver.current_url)
+
+
+
+
+            time.sleep(10)
 
             download_count += download_this_page(download_dir, output_dir, driver, good_soup)
             # check if there is a next page
@@ -315,12 +325,14 @@ def readex_image_scrape(url, download_dir, output_dir):
 
 
 
-
+#Rand Daily Mail
 scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&sort=YMD_date%3AA&fld-nav-0=YMD_date&val-nav-0=1940%20-%201999&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
+
+# Sunday Times
 #scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/news/results?sort=YMD_date%3AD&p=WORLDNEWS&t=pubname%3A16ED7D43CFB7D6F4%21Sunday%2BTimes&maxresults=20&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=coloured&fld-base-2=alltext&bln-base-3=and&val-base-3=bantu&fld-base-3=alltext&fld-nav-1=YMD_date&val-nav-1=1940%20-%201999"
 
 #test url
-scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
+#scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
 
 
 print("starting to scrape...")
