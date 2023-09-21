@@ -23,6 +23,7 @@ from selenium.webdriver.support.select import Select  # Allows button clicks
 import pyautogui
 from dotenv import load_dotenv, find_dotenv
 
+
 def askDialog():
     return tkinter.filedialog.askdirectory()
 
@@ -36,8 +37,8 @@ ssl._create_default_https_context = ssl._create_unverified_context
 output_directory = 'C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scrapped_newsbank/Rand_Daily_Mail'
 download_directory = "C:/Users/mrt64/Downloads"
 
-def download_this_page(download_dir, output_dir, driver, good_soup):
 
+def download_this_page(download_dir, output_dir, driver, good_soup):
     data = driver.execute_script("return document.documentElement.outerHTML")
     print("Extracting documents")
     good_soup = BeautifulSoup(data, "lxml")
@@ -56,7 +57,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         time.sleep(1)
 
         # <div class="search-hit__hit-number">       1      </div>
-        result_number = int( search_hit.find("div", "search-hit__hit-number").text.replace(' ', '') )
+        result_number = int(search_hit.find("div", "search-hit__hit-number").text.replace(' ', ''))
 
         # check if we have already downloaded a file starting with this result_number
         skip_this_result = False
@@ -136,10 +137,6 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         document_title = str(result_number).zfill(4) + "_" + result_source_date  + "_" + result_source_publication_location + "_" + result_source_page_number + "_" + result_source_news_title
         document_title = document_title.replace(' ', '-').replace('\n', '').replace(',', '')
         '''
-        #search_hit.find("td", "meta__value").text
-
-        #           </tbody></table>
-        #           </div>
 
         # open document viewer
         # # <div class="search-hit__title">
@@ -152,29 +149,27 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         driver.get(document_url)
         time.sleep(1)
 
-
-
-        #driver.find_element(By.CLASS_NAME, "actions-bar__button actions-bar__button--download").click()
-            #"actions-bar__button actions-bar__button--download").click()
+        # driver.find_element(By.CLASS_NAME, "actions-bar__button actions-bar__button--download").click()
+        # "actions-bar__button actions-bar__button--download").click()
 
         # download document
         # <button class="download-current pdf-action download-icon s-button" data-action="download" data-batchnum="-1"> Download Page  </button>
 
-        #driver.find_element(By.CLASS_NAME, "download-current pdf-action download-icon s-button").click()
-        #download_link_to_click = driver.find_element(By.XPATH('//button[@class="download-current pdf-action download-icon s-button"]'))
+        # driver.find_element(By.CLASS_NAME, "download-current pdf-action download-icon s-button").click()
+        # download_link_to_click = driver.find_element(By.XPATH('//button[@class="download-current pdf-action download-icon s-button"]'))
         # perform click
-        #download_link_to_click.click()
+        # download_link_to_click.click()
 
         # link_to_click = driver.find_element_by_xpath("//button[@class='download-current pdf-action download-icon s-button']")
         # perform click
         # link_to_click.click()
 
         # wait for download to finish
-        #time.sleep(5)
+        # time.sleep(5)
 
-        #data = driver.execute_script("return document.documentElement.outerHTML")
-        #print("Extracting documents")
-        #better_soup = BeautifulSoup(data, "lxml")
+        # data = driver.execute_script("return document.documentElement.outerHTML")
+        # print("Extracting documents")
+        # better_soup = BeautifulSoup(data, "lxml")
 
         # Download button click
 
@@ -186,15 +181,15 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # </svg>
         # <span class="tooltip">Download or Save to Google Drive</span></button>
 
-        #menu_download_button = better_soup.find("")
-            #"button", class_="actions-bar__button actions-bar__button--download")
+        # menu_download_button = better_soup.find("")
+        # "button", class_="actions-bar__button actions-bar__button--download")
 
-        #menu_download_button = better_soup.find("button", class_="actions-bar__button actions-bar__button--download")
-        #menu_download_button.click()
+        # menu_download_button = better_soup.find("button", class_="actions-bar__button actions-bar__button--download")
+        # menu_download_button.click()
 
         # <button class="download-current pdf-action download-icon s-button" data-action="download" data-batchnum="-1"> Download Page  </button>
-        #download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
-        #download_button.click()
+        # download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
+        # download_button.click()
 
         pyautogui.FAILSAFE = False
         pyautogui.moveTo(1259, 441, duration=0)
@@ -213,34 +208,31 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
                 shutil.move(os.path.join(root, f), output_dir + '/' + str(result_number).zfill(4) + '_' + f)
     return documents_parsed
 
+
 def readex_image_scrape(url, download_dir, output_dir):
     try:
         webdriver_options = Options()
-        #webdriver_options.add_argument('--headless')
+        # webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
         webdriver_options.add_argument('--disable-dev-shm-usage')
         folder_path_to_store_session = "C:\\Users\\mrt64\\AppData\\Local\\Google\\Chrome\\User Data"
         webdriver_options.add_argument("user-data-dir=" + folder_path_to_store_session)
 
-        # driver = webdriver.Chrome(ChromeDriverManager().install(), options=webdriver_options) #chrome_options is deprecated
-
-        #driver = webdriver.Chrome(ChromeDriverManager().install())
-        #s = Service('chromedriver/chromedriver')
         s = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=s, options=webdriver_options)
 
         driver.maximize_window()
-        #driver.set_window_size(1400, 1000)
+        # driver.set_window_size(1400, 1000)
 
         driver.get(url)
-#        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
-        time.sleep(3)  # Wait 4 seconds for all the images to load
+        # driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")  # Scroll to the bottom of the page
+        time.sleep(3)  # Wait for all the images to load
         data = driver.execute_script("return document.documentElement.outerHTML")
         print("Extracting documents")
         good_soup = BeautifulSoup(data, "lxml")
 
-        # Check if me need to login find id  = btnLoginReg
-        login_container = good_soup.find_all(id="btnLoginReg") # good_soup.find_all('id', {'id': 'username'})
+        # Check if we need to log in - find id=btnLoginReg
+        login_container = good_soup.find_all(id="btnLoginReg")  # good_soup.find_all('id', {'id': 'username'})
         if login_container:
             if os.getenv("BRITISH_LIBRARY_USERNAME") is None:
                 load_dotenv(find_dotenv(raise_error_if_not_found=True))
@@ -260,13 +252,10 @@ def readex_image_scrape(url, download_dir, output_dir):
 
         good_soup = BeautifulSoup(data, "lxml")
 
-        expected_download_count = int( driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', '') )
+        expected_download_count = int(
+            driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', ''))
 
         download_count = 0
-
-        #position = pyautogui.position()
-        #position = pyautogui.position()
-        #position = pyautogui.position()
 
         download_count += download_this_page(download_dir, output_dir, driver, good_soup)
 
@@ -274,7 +263,6 @@ def readex_image_scrape(url, download_dir, output_dir):
         is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
 
         while is_there_a_next_page:
-
             # < a title = "Go to next page"
             # href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
             # click next page
@@ -283,9 +271,6 @@ def readex_image_scrape(url, download_dir, output_dir):
             # append the href url to a file
             with open(output_dir + '/visited_urls.txt', 'a') as f:
                 f.write(driver.current_url)
-
-
-
 
             time.sleep(10)
 
@@ -299,6 +284,7 @@ def readex_image_scrape(url, download_dir, output_dir):
 
     except Exception as e:
         print(e)
+
 
 '''
     if os.path.exists(output_directory + '/' + volume + '/' + paper):
@@ -323,26 +309,22 @@ def readex_image_scrape(url, download_dir, output_dir):
                 shutil.move(os.path.join(root, f), output_directory + '/' + volume + '/' + paper + '/' + f)
 '''
 
-
-
-#Rand Daily Mail
+# Rand Daily Mail
 scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&sort=YMD_date%3AA&fld-nav-0=YMD_date&val-nav-0=1940%20-%201999&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
 
 # Sunday Times
-#scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/news/results?sort=YMD_date%3AD&p=WORLDNEWS&t=pubname%3A16ED7D43CFB7D6F4%21Sunday%2BTimes&maxresults=20&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=coloured&fld-base-2=alltext&bln-base-3=and&val-base-3=bantu&fld-base-3=alltext&fld-nav-1=YMD_date&val-nav-1=1940%20-%201999"
+# scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/news/results?sort=YMD_date%3AD&p=WORLDNEWS&t=pubname%3A16ED7D43CFB7D6F4%21Sunday%2BTimes&maxresults=20&f=advanced&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=native&fld-base-1=alltext&bln-base-2=and&val-base-2=coloured&fld-base-2=alltext&bln-base-3=and&val-base-3=bantu&fld-base-3=alltext&fld-nav-1=YMD_date&val-nav-1=1940%20-%201999"
 
-#test url
-#scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
+# test url
+# scrape_this_url = "https://eresources.remote.bl.uk:2159/apps/readex/results?p=HN-SARDM&t=year%3A1955%211955&f=advanced&sort=YMD_date%3AA&val-base-0=white&fld-base-0=alltext&bln-base-1=and&val-base-1=toothpaste&fld-base-1=alltext&bln-base-2=and&val-base-2=bantu&fld-base-2=alltext&bln-base-3=and&val-base-3=coloured&fld-base-3=alltext"
 
 
 print("starting to scrape...")
-
 
 # delete all files in download_directory
 for root, dirs, files in os.walk(download_directory):
     for f in files:
         os.unlink(os.path.join(root, f))
-
 
 print(f"  URL: {scrape_this_url}")
 
