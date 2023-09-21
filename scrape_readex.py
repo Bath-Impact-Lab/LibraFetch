@@ -40,9 +40,6 @@ download_directory = "C:/Users/mrt64/Downloads"
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
 
-    time.sleep(3)
-    return 10
-
     data = driver.execute_script("return document.documentElement.outerHTML")
     print("Extracting documents")
     good_soup = BeautifulSoup(data, "lxml")
