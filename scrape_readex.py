@@ -34,8 +34,8 @@ def inp(text):
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-output_directory = 'C:/Users/mrt64/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scrapped_newsbank/Rand_Daily_Mail'
-download_directory = "C:/Users/mrt64/Downloads"
+output_directory = 'C:/Users/info/OneDrive/Documents/ART-AI/OneDrive/OneDrive - University of Bath/Student-Meetings-Notes/Alice/scrapped_newsbank/Rand_Daily_Mail'
+download_directory = "C:/Users/info/Downloads"
 
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
@@ -197,11 +197,11 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         #pos2 = pyautogui.position()
 
         pyautogui.FAILSAFE = False
-        pyautogui.moveTo(1259, 441, duration=0)
+        pyautogui.moveTo(1198, 311, duration=0)
         pyautogui.click()
 
         # download document
-        pyautogui.moveTo(662, 582, duration=1)
+        pyautogui.moveTo(723, 417, duration=1)
         pyautogui.click()
 
         time.sleep(5)
@@ -223,8 +223,8 @@ def readex_image_scrape(url, download_dir, output_dir):
         # webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
         webdriver_options.add_argument('--disable-dev-shm-usage')
-        folder_path_to_store_session = "C:\\Users\\mrt64\\AppData\\Local\\Google\\Chrome\\User Data"
-        webdriver_options.add_argument("user-data-dir=" + folder_path_to_store_session)
+       # folder_path_to_store_session = "C:\\Users\\mrt64\\AppData\\Local\\Google\\Chrome\\User Data"
+       # webdriver_options.add_argument("user-data-dir=" + folder_path_to_store_session)
 
         s = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=s, options=webdriver_options)
@@ -284,9 +284,11 @@ def readex_image_scrape(url, download_dir, output_dir):
         download_count += download_this_page(download_dir, output_dir, driver, good_soup)
 
         # find a tag with title = "Go to next page"
-        is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
 
-        while is_there_a_next_page:
+
+        #is_there_a_next_page = driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+
+        while download_count < expected_download_count:
             # click next page
             #  < a title = "Go to next page" href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
             driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]').click()
@@ -307,7 +309,7 @@ def readex_image_scrape(url, download_dir, output_dir):
             driver.get(current_page_being_parsed)
             time.sleep(6)
 
-            is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+            #is_there_a_next_page = driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]')
         #
         ################################################################################################################
 
