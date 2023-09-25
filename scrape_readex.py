@@ -40,9 +40,6 @@ download_directory = "C:/Users/mrt64/Downloads"
 
 def download_this_page(download_dir, output_dir, driver, good_soup):
 
-    time.sleep(3)
-    return 10
-
     data = driver.execute_script("return document.documentElement.outerHTML")
     print("Extracting documents")
     good_soup = BeautifulSoup(data, "lxml")
@@ -195,6 +192,10 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # download_button = better_soup.find("button", class_="download-current pdf-action download-icon s-button")
         # download_button.click()
 
+        # print coordinates of mouse
+        #pos1 = pyautogui.position()
+        #pos2 = pyautogui.position()
+
         pyautogui.FAILSAFE = False
         pyautogui.moveTo(1259, 441, duration=0)
         pyautogui.click()
@@ -289,17 +290,23 @@ def readex_image_scrape(url, download_dir, output_dir):
             # click next page
             #  < a title = "Go to next page" href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
             driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]').click()
+            time.sleep(6)
             data = driver.execute_script("return document.documentElement.outerHTML")
             good_soup = BeautifulSoup(data, "lxml")
 
             # append the href url to a file
+            current_page_being_parsed = driver.current_url
             with open(output_dir + '/visited_urls.txt', 'a') as f:
-                f.write(driver.current_url + '\n')
+                f.write(current_page_being_parsed + '\n')
 
             time.sleep(10)
 
             download_count += download_this_page(download_dir, output_dir, driver, good_soup)
+
             # check if there is a next page
+            driver.get(current_page_being_parsed)
+            time.sleep(6)
+
             is_there_a_next_page = driver.find_elements(By.CSS_SELECTOR, 'a[title="Go to next page"]')
         #
         ################################################################################################################
