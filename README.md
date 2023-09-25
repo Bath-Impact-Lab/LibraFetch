@@ -1,6 +1,6 @@
 # LibraFetch
 
-Document Downloader for Library Catalogues, LibraFetch is a specialized web scraping tool to automatically acquire documents from a multitude of library catalogues, archives, and digital repositories. This purpose-built solution simplifies the process of retrieving academic papers, research reports, historical documents, and various PDF files from library systems, streamlining research and data collection.
+LibraFetch is a specialised web scraping tool to automatically acquire documents from a multitude of library catalogues, archives, and digital repositories. This purpose-built solution simplifies the process of retrieving academic papers, research reports, historical documents, and various types of files such as images from library systems, streamlining research and data collection.
 
 ## Features
 
