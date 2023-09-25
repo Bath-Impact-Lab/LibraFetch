@@ -29,7 +29,7 @@ LibraFetch is a specialised web scraping tool to automatically acquire documents
 - **Team Friendly**:
     LibraFetch supports multiple users, allowing teams to collaborate on document retrieval tasks.
 
-Use Cases:
+## Use Cases:
 1.	**Academic Research**: Researchers and students can use the downloader to access academic papers, journals, and theses from library databases, enhancing their study materials.
 2.	**Historical Archives**: Historians and genealogists can retrieve historical records, manuscripts, and rare documents from digital library archives for research and preservation.
 3.	**Professional Development**: Professionals in various fields can stay updated with the latest industry reports, research papers, and best practice documents.
