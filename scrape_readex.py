@@ -219,6 +219,10 @@ def readex_image_scrape(url, download_dir, output_dir):
         ################################################################################################################
         # Set up webdriver
         print("Starting WebScraper 🌐➡📚")
+
+        print("Sleeping for 1.5 hours to avoid being blocked by the British Library")
+        time.sleep(60*60*1.5) # sleep 1.5 hours
+
         webdriver_options = Options()
         # webdriver_options.add_argument('--headless')
         webdriver_options.add_argument('--no-sandbox')
@@ -287,6 +291,7 @@ def readex_image_scrape(url, download_dir, output_dir):
 
 
         #is_there_a_next_page = driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]')
+        chunks_download = 1
 
         while download_count < expected_download_count:
             # click next page
@@ -304,6 +309,39 @@ def readex_image_scrape(url, download_dir, output_dir):
             time.sleep(10)
 
             download_count += download_this_page(download_dir, output_dir, driver, good_soup)
+            chunks_download += 1
+
+            # fix for download rate limit
+            if(chunks_download > 3):
+                time.sleep(60*60*2.6) # sleep 2.6 hours
+
+                driver.get(current_page_being_parsed)
+                data = driver.execute_script("return document.documentElement.outerHTML")
+                good_soup = BeautifulSoup(data, "lxml")
+
+                ################################################################################################################
+                # Check if we need to log in - find id=btnLoginReg
+                login_container = good_soup.find_all(id="btnLoginReg")  # good_soup.find_all('id', {'id': 'username'})
+                if login_container:
+                    if os.getenv("BRITISH_LIBRARY_USERNAME") is None:
+                        load_dotenv(find_dotenv(raise_error_if_not_found=True))
+                    print("Signing in as:" + os.getenv("BRITISH_LIBRARY_USERNAME"))
+                    USERNAME = os.getenv("BRITISH_LIBRARY_USERNAME")
+                    PASSWORD = os.getenv("BRITISH_LIBRARY_PASSWORD")
+
+                    # fill out username and password
+                    username = driver.find_element(By.ID, "username")
+                    username.send_keys(USERNAME)
+                    password = driver.find_element(By.ID, "password")
+                    password.send_keys(PASSWORD)
+                    # click login button
+                    login_button = driver.find_element(By.ID, "btnLoginReg")
+                    login_button.click()
+                    time.sleep(10)
+                #
+                ################################################################################################################
+
+                chunks_download = 0
 
             # check if there is a next page
             driver.get(current_page_being_parsed)
