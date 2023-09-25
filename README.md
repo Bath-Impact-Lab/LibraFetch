@@ -1,5 +1,8 @@
-# WebScraper
-Web scrapper for bulk downloading images and videos from the web.</br>
+# LibraFetch
+
+The PDF Document Downloader for Library Catalogues is a specialized web scraping tool to acquire PDF documents from a multitude of library catalogues, archives, and digital repositories. This purpose-built solution simplifies the process of retrieving academic papers, research reports, historical documents, and various PDF files from library systems, streamlining research and data collection.
+
+</br>
 It implements [Selenium](https://www.seleniumhq.org/) for browser automation and [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) for parsing.
 
 ---
