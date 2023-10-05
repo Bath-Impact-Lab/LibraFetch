@@ -58,7 +58,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         time.sleep(1)
 
         # <div class="search-hit__hit-number">       1      </div>
-        result_number = int(search_hit.find("div", "search-hit__hit-number").text.replace(' ', ''))
+        result_number = int(search_hit.find("div", "search-hit__hit-number").text.replace(' ', '').replace(',', ''))
 
         # check if we have already downloaded a file starting with this result_number
         skip_this_result = False
@@ -72,6 +72,8 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
 
         if skip_this_result:
             continue
+
+        time.sleep(60 * 4)
 
         # clear download directory
         for root, dirs, files in os.walk(download_dir):
@@ -204,7 +206,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         pyautogui.moveTo(723, 417, duration=1)
         pyautogui.click()
 
-        time.sleep(5)
+        time.sleep(10)
 
         # move files in download_directory to output_directory
         for root, dirs, files in os.walk(download_dir):
@@ -220,8 +222,8 @@ def readex_image_scrape(url, download_dir, output_dir):
         # Set up webdriver
         print("Starting WebScraper 🌐➡📚")
 
-        print("Sleeping for 1.5 hours to avoid being blocked by the British Library")
-        time.sleep(60*60*1.5) # sleep 1.5 hours
+        #time.sleep(60 * 60 * 2.6)  # sleep 2.6 hours
+        #time.sleep(60 * 60 * 1.6)  # sleep 2.6 hours
 
         webdriver_options = Options()
         # webdriver_options.add_argument('--headless')
@@ -309,11 +311,11 @@ def readex_image_scrape(url, download_dir, output_dir):
             time.sleep(10)
 
             download_count += download_this_page(download_dir, output_dir, driver, good_soup)
-            chunks_download += 1
+            chunks_download += 2
 
             # fix for download rate limit
-            if(chunks_download > 3):
-                time.sleep(60*60*2.6) # sleep 2.6 hours
+            if(chunks_download > 300) and download_count > 510 :
+                #time.sleep(60*60*2.1) # sleep 2.1 hours
 
                 driver.get(current_page_being_parsed)
                 data = driver.execute_script("return document.documentElement.outerHTML")
