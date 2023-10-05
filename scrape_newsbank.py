@@ -45,10 +45,10 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
     good_soup = BeautifulSoup(data, "lxml")
 
     # Parse each page of search results until there is no next page
-    search_results_this_page = good_soup.find_all("div", "search-hits")
+    search_results_this_page = good_soup.find("div", "search-hits")
 
     # get all classes called search-hit
-    search_hits = search_results_this_page[0].find_all("div", "search-hit")
+    search_hits = search_results_this_page.find_all('article')
     documents_parsed = 0
     # for each result
     for search_hit in search_hits:
@@ -57,8 +57,21 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
 
         time.sleep(1)
 
-        # <div class="search-hit__hit-number">       1      </div>
-        result_number = int(search_hit.find("div", "search-hit__hit-number").text.replace(' ', '').replace(',', ''))
+        # <article id="search-hits__hit--21" class="search-hits__hit search-hits__hit--image" data-docref="image/v2:16ED7D43CFB7D6F4@WHNPX-16F7CD2912BEC092@2442607-16F7CE495CFFF6AF@14-16F7CE495CFFF6AF@" data-pbi="16ED7D43CFB7D6F4">
+        # ... <div class="search-hit-extended-preview-button__wrapper"><button data-hit-id="search-hits__hit--21" class="search-hit-extended-preview-button"><svg width="20px" height="14px" viewBox="0 0 20 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+
+        # search-hits__hit--21
+        # invalid literal for int() with base 10: '\n\n\n\nGotothedocumentviewerforSundayTimes:Page33\n\n\nMay171998\n\n\n\nSundayTimes\n\n\n\nJohannesburgSouthAfrica\n\nPage33\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPreview\n\n\n\nArticlePreview×\n\nViewDocume
+        # regex = re.compile('search-hits__hit--.*')
+        #soup.find_all("div", {"class": regex})
+        #tmp_result = search_hit.find("article", {"id": regex}).text
+        #tmp_result = search_hit.find(id=regex).text
+
+        tmp_result = search_hit.attrs['id']
+
+        #tmp_result = search_hit.__getattribute__('id')
+        result_number = int(tmp_result.replace('search-hits__hit--', '').replace(' ', '').replace(',', ''))
 
         # check if we have already downloaded a file starting with this result_number
         skip_this_result = False
@@ -73,7 +86,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         if skip_this_result:
             continue
 
-        time.sleep(60 * 4)
+        #
 
         # clear download directory
         for root, dirs, files in os.walk(download_dir):
@@ -142,15 +155,18 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         '''
 
         # open document viewer
-        # # <div class="search-hit__title">
-        #         #         <a href="/apps/readex/doc?p=HN-SARDM&amp;sort=YMD_date%3AA&amp;fld-nav-0=YMD_date&amp;val-nav-0=1940%20-%201999&amp;f=advanced&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=native&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext&amp;docref=image/v2%3A135DEF57238F5FC5%40EANX-15EDB9864F2C0C68%402429634-15ED19F4ED007648%4011-15ED19F4ED007648%40&amp;firsthit=yes" title="Go to document viewer for News Article">News Article</a>
-        #
-        document_url = search_hit.find('a', {'title': 'Go to document viewer for News Article'})['href']
+        # <a href="/apps/news/document-view?p=WORLDNEWS&amp;t ... "><span class="element-invisible">Go to the document viewer for </span>Sunday Times: Page 15</a>
+
+        regex = re.compile('.*Sunday Times.*')
+        document_url = search_hit.find('a', {'title': regex})['href']
         document_url = "https://eresources.remote.bl.uk:2159" + document_url
 
         # open document viewer
         driver.get(document_url)
-        time.sleep(1)
+
+        time.sleep(60 * 4)
+
+        time.sleep(2)
 
         # driver.find_element(By.CLASS_NAME, "actions-bar__button actions-bar__button--download").click()
         # "actions-bar__button actions-bar__button--download").click()
@@ -232,7 +248,8 @@ def newsbank_scrape(url, download_dir, output_dir):
        # folder_path_to_store_session = "C:\\Users\\mrt64\\AppData\\Local\\Google\\Chrome\\User Data"
        # webdriver_options.add_argument("user-data-dir=" + folder_path_to_store_session)
 
-        s = Service(ChromeDriverManager().install())
+        # s = Service(ChromeDriverManager().install())   # laptop
+        s = Service('chromedriver/chromedriver')   # desktop
         driver = webdriver.Chrome(service=s, options=webdriver_options)
 
         driver.maximize_window()
@@ -284,7 +301,10 @@ def newsbank_scrape(url, download_dir, output_dir):
         data = driver.execute_script("return document.documentElement.outerHTML")
         good_soup = BeautifulSoup(data, "lxml")
 
-        expected_download_count = int(driver.find_element(By.CLASS_NAME, "search-hit__result-details__total").text.replace(',', ''))
+        # <div class="search-hits__meta--total_hits">
+        #       378 Results
+        #     </div>
+        expected_download_count = int(driver.find_element(By.CLASS_NAME, "search-hits__meta--total_hits").text.replace(',', '').replace('Results', '').replace(' ', ''))
 
         download_count = 0
         download_count += download_this_page(download_dir, output_dir, driver, good_soup)
@@ -298,7 +318,7 @@ def newsbank_scrape(url, download_dir, output_dir):
         while download_count < expected_download_count:
             # click next page
             #  < a title = "Go to next page" href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
-            driver.find_element(By.CSS_SELECTOR, 'a[title="Go to next page"]').click()
+            driver.find_element(By.CSS_SELECTOR, 'a[title="Next"]').click()
             time.sleep(6)
             data = driver.execute_script("return document.documentElement.outerHTML")
             good_soup = BeautifulSoup(data, "lxml")
@@ -314,7 +334,7 @@ def newsbank_scrape(url, download_dir, output_dir):
             chunks_download += 2
 
             # fix for download rate limit
-            if(chunks_download > 300) and download_count > 510 :
+            if(chunks_download > 300) and download_count > -1:
                 #time.sleep(60*60*2.1) # sleep 2.1 hours
 
                 driver.get(current_page_being_parsed)
