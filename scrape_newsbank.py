@@ -164,7 +164,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # open document viewer
         driver.get(document_url)
 
-        time.sleep(60 * 4)
+
 
         time.sleep(2)
 
@@ -211,18 +211,24 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # download_button.click()
 
         # print coordinates of mouse
-        pos1 = pyautogui.position()
-        pos2 = pyautogui.position()
+        #pos1 = pyautogui.position()
+        #pos2 = pyautogui.position()
 
         pyautogui.FAILSAFE = False
-        pyautogui.moveTo(1198, 311, duration=0)
+        pyautogui.moveTo(769, 320, duration=0)
         pyautogui.click()
 
         # download document
-        pyautogui.moveTo(723, 417, duration=1)
+        pyautogui.moveTo(815, 390, duration=1)
+        pyautogui.click()
+        time.sleep(0.5)
         pyautogui.click()
 
-        time.sleep(10)
+        pyautogui.moveTo(958, 671, duration=1)
+        pyautogui.click()
+
+
+        time.sleep(60 * 4)
 
         # move files in download_directory to output_directory
         for root, dirs, files in os.walk(download_dir):
@@ -248,8 +254,8 @@ def newsbank_scrape(url, download_dir, output_dir):
        # folder_path_to_store_session = "C:\\Users\\mrt64\\AppData\\Local\\Google\\Chrome\\User Data"
        # webdriver_options.add_argument("user-data-dir=" + folder_path_to_store_session)
 
-        # s = Service(ChromeDriverManager().install())   # laptop
-        s = Service('chromedriver/chromedriver')   # desktop
+        s = Service(ChromeDriverManager().install())   # laptop
+        # s = Service('chromedriver/chromedriver')   # desktop
         driver = webdriver.Chrome(service=s, options=webdriver_options)
 
         driver.maximize_window()
@@ -318,7 +324,8 @@ def newsbank_scrape(url, download_dir, output_dir):
         while download_count < expected_download_count:
             # click next page
             #  < a title = "Go to next page" href = "/apps/readex/results?page=1&amp;p=HN-SARDM&amp;t=year%3A1955%211955&amp;f=advanced&amp;sort=YMD_date%3AA&amp;val-base-0=white&amp;fld-base-0=alltext&amp;bln-base-1=and&amp;val-base-1=toothpaste&amp;fld-base-1=alltext&amp;bln-base-2=and&amp;val-base-2=bantu&amp;fld-base-2=alltext&amp;bln-base-3=and&amp;val-base-3=coloured&amp;fld-base-3=alltext" > next › < / a >
-            driver.find_element(By.CSS_SELECTOR, 'a[title="Next"]').click()
+            #driver.find_element(By.CSS_SELECTOR, 'a[text="Next"]').click()
+            driver.find_element(By.LINK_TEXT, 'Next').click()
             time.sleep(6)
             data = driver.execute_script("return document.documentElement.outerHTML")
             good_soup = BeautifulSoup(data, "lxml")
