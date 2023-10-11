@@ -96,7 +96,7 @@ def download_this_page(download_dir, output_dir, driver, good_soup):
         # open document viewer
         # <a href="/apps/news/document-view?p=WORLDNEWS&amp;t ... "><span class="element-invisible">Go to the document viewer for </span>Sunday Times: Page 15</a>
 
-        regex = re.compile('.*Sunday Times.*')
+        regex = re.compile('.*Go to the document viewer for.*')
         document_url = search_hit.find('a', {'title': regex})['href']
         document_url = "https://eresources.remote.bl.uk:2159" + document_url
 
