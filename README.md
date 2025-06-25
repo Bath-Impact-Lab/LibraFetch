@@ -67,3 +67,7 @@ python scrape.py
 Open output folder to see whats been scraped.
 
 ---
+
+## License
+
+LibraFetch is distributed under the [MIT License](LICENSE).
