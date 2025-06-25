@@ -19,7 +19,7 @@ LibraFetch is a specialised web scraping tool to automatically acquire documents
 - **Batch Downloading**:
   LibraFetch supports batch downloading, allowing users to save multiple documents simultaneously. This feature is especially valuable for researchers looking to compile extensive reading lists or archives.
 - **Robust PDF Handling**:
-  The downloader can handle various doaload formats, including OCR-processed documents and scanned images, ensuring that all types of content are accessible.
+  The downloader can handle various download formats, including OCR-processed documents and scanned images, ensuring that all types of content are accessible.
 - **Error Handling and Notifications**:
   The tool is equipped with error detection and handling mechanisms to address issues such as broken links, captcha challenges, or website changes. Users can set up notifications for exceptional cases.
 - **Data Storage Options**:
