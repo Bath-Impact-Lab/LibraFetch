@@ -1,3 +1,5 @@
+![LibraFetch banner](images/librafetch-banner.png)
+
 # LibraFetch
 
 LibraFetch is a specialised web scraping tool to automatically acquire documents from a multitude of library catalogues, archives, and digital repositories. This purpose-built solution simplifies the process of retrieving academic papers, research reports, historical documents, and various types of files such as images from library systems, streamlining research and data collection.
