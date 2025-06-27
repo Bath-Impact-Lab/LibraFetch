@@ -1,4 +1,4 @@
-![LibraFetch banner](images/librafetch.png)
+![LibraFetch banner](images/LibraFetch.png)
 
 # LibraFetch
 
